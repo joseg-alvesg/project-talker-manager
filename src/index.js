@@ -33,6 +33,14 @@ app.get('/talker', async (req, res) => {
   }
 });
 
+app.get('/talker/search', tokenValid, async (req, res) => {
+  const { q } = req.query;
+  console.log(q);
+  const data = await readDataFile(talkerJson);
+  const filteredData = data.filter((d) => d.name.includes(q));
+  res.status(200).json(filteredData);
+});
+
 app.get('/talker/:id', async (req, res) => {
   const { id } = req.params;
   try {
