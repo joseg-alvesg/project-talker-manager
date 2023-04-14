@@ -1,6 +1,7 @@
 const express = require('express');
 const path = require('path');
-const readDataFile = require('./utils/readDataFile');
+const { readDataFile, writeDataFile } = require('./utils/readAndWriteDataFile');
+
 const tokenGenerator = require('./utils/tokenGenerator');
 const loginValid = require('./middlewares/loginValid');
 const tokenValid = require('./middlewares/tokenValid');
@@ -25,7 +26,7 @@ app.get('/', (_request, response) => {
 
 app.get('/talker', async (req, res) => {
   try {
-    const data = await readDataFile.readDataFile(talkerJson);
+    const data = await readDataFile(talkerJson);
     res.status(200).json(data);
   } catch (error) {
     res.status(500).json({ messsage: 'Deu algum erro aqui' });
@@ -35,7 +36,7 @@ app.get('/talker', async (req, res) => {
 app.get('/talker/:id', async (req, res) => {
   const { id } = req.params;
   try {
-    const data = await readDataFile.readDataFile(talkerJson);
+    const data = await readDataFile(talkerJson);
     const findId = data.find((d) => d.id === Number(id));
     if (!findId) return res.status(404).json({ message: 'Pessoa palestrante não encontrada' });
     return res.status(200).json(findId);
@@ -60,11 +61,11 @@ app.post('/talker',
   talkRateValid,
   async (req, res) => {
   const { name, age, talk } = req.body;
-  const data = await readDataFile.readDataFile(talkerJson);
+  const data = await readDataFile(talkerJson);
   const id = data[data.length - 1].id + 1;
   const newTalker = { id, name, age, talk };
   const allTalkers = [...data, newTalker];
-  await readDataFile.writeDataFile(talkerJson, allTalkers);
+  await writeDataFile(talkerJson, allTalkers);
   return res.status(201).json(newTalker);
 });
 
