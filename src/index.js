@@ -69,6 +69,24 @@ app.post('/talker',
   return res.status(201).json(newTalker);
 });
 
+app.put('/talker/:id', 
+  tokenValid,
+  nameValid,
+  ageValid,
+  talkValid,
+  talkWatchedValid,
+  talkRateValid,
+  async (req, res) => {
+    const { id } = req.params;
+    const { name, age, talk } = req.body;
+    const data = await readDataFile(talkerJson);
+    const index = data.findIndex((d) => d.id === Number(id));
+    if (!data[index]) return res.status(404).json({ message: 'Pessoa palestrante não encontrada' });
+    data[index] = { id: Number(id), name, age, talk };
+    await writeDataFile(talkerJson, data);
+    res.status(200).json(data[index]);
+  });
+
 app.listen(PORT, () => {
   console.log('3001 tá on hein');
 });
