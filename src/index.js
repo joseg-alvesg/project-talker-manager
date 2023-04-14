@@ -85,7 +85,15 @@ app.put('/talker/:id',
     data[index] = { id: Number(id), name, age, talk };
     await writeDataFile(talkerJson, data);
     res.status(200).json(data[index]);
-  });
+});
+
+app.delete('/talker/:id', tokenValid, async (req, res) => {
+  const { id } = req.params;
+  const data = await readDataFile(talkerJson);
+  const filteredData = data.filter((d) => d.id !== Number(id));
+  await writeDataFile(talkerJson, filteredData);
+  res.sendStatus(204);
+});
 
 app.listen(PORT, () => {
   console.log('3001 tá on hein');
