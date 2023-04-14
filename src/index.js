@@ -1,7 +1,16 @@
 const express = require('express');
+const path = require('path');
 const readDataFile = require('./utils/readDataFile');
 const tokenGenerator = require('./utils/tokenGenerator');
 const loginValid = require('./middlewares/loginValid');
+const tokenValid = require('./middlewares/tokenValid');
+const nameValid = require('./middlewares/nameValid');
+const ageValid = require('./middlewares/ageValid');
+const talkValid = require('./middlewares/talkValid');
+const talkWatchedValid = require('./middlewares/talkWatchedValid');
+const talkRateValid = require('./middlewares/talkRateValid');
+
+const talkerJson = path.resolve(__dirname, './talker.json');
 
 const app = express();
 app.use(express.json());
@@ -16,7 +25,7 @@ app.get('/', (_request, response) => {
 
 app.get('/talker', async (req, res) => {
   try {
-    const data = await readDataFile();
+    const data = await readDataFile.readDataFile(talkerJson);
     res.status(200).json(data);
   } catch (error) {
     res.status(500).json({ messsage: 'Deu algum erro aqui' });
@@ -26,7 +35,7 @@ app.get('/talker', async (req, res) => {
 app.get('/talker/:id', async (req, res) => {
   const { id } = req.params;
   try {
-    const data = await readDataFile();
+    const data = await readDataFile.readDataFile(talkerJson);
     const findId = data.find((d) => d.id === Number(id));
     if (!findId) return res.status(404).json({ message: 'Pessoa palestrante não encontrada' });
     return res.status(200).json(findId);
@@ -40,6 +49,23 @@ app.post('/login', loginValid, (req, res) => {
   const token = tokenGenerator();
   const user = { email, password, token };
   res.status(200).json(user);
+});
+
+app.post('/talker',
+  tokenValid,
+  nameValid,
+  ageValid,
+  talkValid,
+  talkWatchedValid,
+  talkRateValid,
+  async (req, res) => {
+  const { name, age, talk } = req.body;
+  const data = await readDataFile.readDataFile(talkerJson);
+  const id = data[data.length - 1].id + 1;
+  const newTalker = { id, name, age, talk };
+  const allTalkers = [...data, newTalker];
+  await readDataFile.writeDataFile(talkerJson, allTalkers);
+  return res.status(201).json(newTalker);
 });
 
 app.listen(PORT, () => {
