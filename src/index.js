@@ -1,5 +1,6 @@
 const express = require('express');
 const readDataFile = require('./utils/readDataFile');
+const tokenGenerator = require('./utils/tokenGenerator');
 
 const app = express();
 app.use(express.json());
@@ -31,6 +32,13 @@ app.get('/talker/:id', async (req, res) => {
   } catch (error) {
     res.status(500).json({ message: 'Deu algum erro aqui' });
   }
+});
+
+app.post('/login', (req, res) => {
+  const { email, password } = req.body;
+  const token = tokenGenerator();
+  const user = { email, password, token };
+  res.status(200).json(user);
 });
 
 app.listen(PORT, () => {
