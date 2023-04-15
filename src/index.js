@@ -10,6 +10,7 @@ const ageValid = require('./middlewares/ageValid');
 const talkValid = require('./middlewares/talkValid');
 const talkWatchedValid = require('./middlewares/talkWatchedValid');
 const talkRateValid = require('./middlewares/talkRateValid');
+const talkRateQueryValid = require('./middlewares/talkRateQueryValid');
 
 const talkerJson = path.resolve(__dirname, './talker.json');
 
@@ -33,11 +34,16 @@ app.get('/talker', async (req, res) => {
   }
 });
 
-app.get('/talker/search', tokenValid, async (req, res) => {
-  const { q } = req.query;
-  console.log(q);
+app.get('/talker/search', tokenValid, talkRateQueryValid, async (req, res) => {
+  const { q, rate } = req.query;
   const data = await readDataFile(talkerJson);
-  const filteredData = data.filter((d) => d.name.includes(q));
+  let filteredData = data;
+  if (q) {
+    filteredData = data.filter((d) => d.name.includes(q));
+  }
+  if (rate) {
+    filteredData = data.filter((d) => d.talk.rate === +rate);
+  }
   res.status(200).json(filteredData);
 });
 
