@@ -11,6 +11,7 @@ const talkValid = require('./middlewares/talkValid');
 const talkWatchedValid = require('./middlewares/talkWatchedValid');
 const talkRateValid = require('./middlewares/talkRateValid');
 const talkRateQueryValid = require('./middlewares/talkRateQueryValid');
+const talkDateQueryValid = require('./middlewares/talkDateQueryValid');
 
 const talkerJson = path.resolve(__dirname, './talker.json');
 
@@ -34,8 +35,8 @@ app.get('/talker', async (req, res) => {
   }
 });
 
-app.get('/talker/search', tokenValid, talkRateQueryValid, async (req, res) => {
-  const { q, rate } = req.query;
+app.get('/talker/search', tokenValid, talkRateQueryValid, talkDateQueryValid, async (req, res) => {
+  const { q, rate, date } = req.query;
   const data = await readDataFile(talkerJson);
   let filteredData = data;
   if (q) {
@@ -43,6 +44,9 @@ app.get('/talker/search', tokenValid, talkRateQueryValid, async (req, res) => {
   }
   if (rate) {
     filteredData = filteredData.filter((d) => d.talk.rate === +rate);
+  }
+  if (date) {
+    filteredData = filteredData.filter((d) => d.talk.watchedAt === date);
   }
   res.status(200).json(filteredData);
 });
