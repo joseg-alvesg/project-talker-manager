@@ -114,5 +114,5 @@ app.delete('/talker/:id', tokenValid, async (req, res) => {
 });
 
 app.listen(PORT, () => {
-  console.log('3001 tá on hein');
+  console.log(`${PORT} Uma oddiseia no espaço`);
 });
