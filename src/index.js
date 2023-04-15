@@ -13,6 +13,8 @@ const talkRateValid = require('./middlewares/talkRateValid');
 const talkRateQueryValid = require('./middlewares/talkRateQueryValid');
 const talkDateQueryValid = require('./middlewares/talkDateQueryValid');
 const rateValid = require('./middlewares/rateValid');
+const { select } = require('./db/talkerDB');
+const editObject = require('./utils/editeObject');
 
 const talkerJson = path.resolve(__dirname, './talker.json');
 
@@ -50,6 +52,16 @@ app.get('/talker/search', tokenValid, talkRateQueryValid, talkDateQueryValid, as
     filteredData = filteredData.filter((d) => d.talk.watchedAt === date);
   }
   res.status(200).json(filteredData);
+});
+
+app.get('/talker/db', async (req, res) => {
+  try {
+    const [data] = await select();
+    const organizedData = data.map((d) => editObject(d));
+    res.status(200).json(organizedData);
+  } catch (err) {
+    res.sendStatus(500);
+  }
 });
 
 app.get('/talker/:id', async (req, res) => {
@@ -114,7 +126,6 @@ app.delete('/talker/:id', tokenValid, async (req, res) => {
   res.sendStatus(204);
 });
 
-// Crie o endpoint PATCH /talker/rate/:id
 app.patch('/talker/rate/:id', tokenValid, rateValid, async (req, res) => {
   const { id } = req.params;
   const { rate } = req.body;
@@ -122,7 +133,14 @@ app.patch('/talker/rate/:id', tokenValid, rateValid, async (req, res) => {
   const index = data.findIndex((d) => d.id === +id);
   data[index].talk.rate = rate;
   await writeDataFile(talkerJson, data);
-  res.sendStatus(204);
+  res.sendStatus(204); module.exports = (req, res, next) => {
+    const { date } = req.query;
+    const isFormatDate = /^([0-2][0-9]|(3)[0-1])(\/)(((0)[0-9])|((1)[0-2]))(\/)\d{4}$/i;
+    if (date && !isFormatDate.test(date)) {
+      return res.status(400).json({ message: 'O parâmetro "date" deve ter o formato "dd/mm/aaaa"' });
+    }
+    next();
+  };
 });
 
 app.listen(PORT, () => {

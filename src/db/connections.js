@@ -8,4 +8,4 @@ const connection = mysql.createPool({
   database: 'TalkerDB',
 });
 
-module.export = connection;
+module.exports = connection;
