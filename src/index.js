@@ -42,7 +42,7 @@ app.get('/talker/search', tokenValid, talkRateQueryValid, async (req, res) => {
     filteredData = data.filter((d) => d.name.includes(q));
   }
   if (rate) {
-    filteredData = data.filter((d) => d.talk.rate === +rate);
+    filteredData = filteredData.filter((d) => d.talk.rate === +rate);
   }
   res.status(200).json(filteredData);
 });
