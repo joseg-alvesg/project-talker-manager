@@ -12,6 +12,7 @@ const talkWatchedValid = require('./middlewares/talkWatchedValid');
 const talkRateValid = require('./middlewares/talkRateValid');
 const talkRateQueryValid = require('./middlewares/talkRateQueryValid');
 const talkDateQueryValid = require('./middlewares/talkDateQueryValid');
+const rateValid = require('./middlewares/rateValid');
 
 const talkerJson = path.resolve(__dirname, './talker.json');
 
@@ -110,6 +111,17 @@ app.delete('/talker/:id', tokenValid, async (req, res) => {
   const data = await readDataFile(talkerJson);
   const filteredData = data.filter((d) => d.id !== Number(id));
   await writeDataFile(talkerJson, filteredData);
+  res.sendStatus(204);
+});
+
+// Crie o endpoint PATCH /talker/rate/:id
+app.patch('/talker/rate/:id', tokenValid, rateValid, async (req, res) => {
+  const { id } = req.params;
+  const { rate } = req.body;
+  const data = await readDataFile(talkerJson);
+  const index = data.findIndex((d) => d.id === +id);
+  data[index].talk.rate = rate;
+  await writeDataFile(talkerJson, data);
   res.sendStatus(204);
 });
 
