@@ -4,5 +4,8 @@ module.exports = (req, res, next) => {
   if (!talk.watchedAt) {
     return res.status(400).json({ message: 'O campo "watchedAt" é obrigatório' });
   }
+  if (talk.rate === undefined) {
+    return res.status(400).json({ message: 'O campo "rate" é obrigatório' });
+  }
   next();
 };
